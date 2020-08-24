@@ -17,30 +17,28 @@
 采用4台腾讯云4C8G云主机作为部署介质，部署1个pd节点、1个tidb节点以及3个tikv节点。其中，pd节点和tidb节点混部在1台机器上，tikv节点独占3台机器，prometheus等监控组件跟tidb、pd部署同一台云主机。
 
 # sysbench 测试
-[集群配置]()
-[集群拓扑结构]()
+![集群配置](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/conf.png)
+![集群拓扑结构](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/topology.png)
+
+## 测试用例
 ```
 sysbench --config-file=sysbench.conf oltp_update_index --tables=8 --table-size=200000 run
 ```
 ## sysbench 执行结果
-[sysbench执行结果]()
+![sysbench执行结果](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/sysbench_output.png)  
+
 查询性能: 20856 QPS/TPS
 p95: 0.52ms
 ## 监控
-[tidb query summary QPS&duration]()
-[tikv cluster details cpu]()
-[tikv cluster details QPS]()
-[tikv details grpc QPS&duration]()
-[tikv cluster details leader]()
+![tidb query summary QPS&duration](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/sysbench_tidb_query_summary.png)
+![tikv cluster details cpu](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/sysbench_tikv_details_cpu.png)
+![tikv cluster details QPS](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/sysbench_tikv_details_qps.png)
+![tikv details grpc QPS&duration](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/sysbench_tikv_details_grpc_qps.png)
+![tikv details grpc QPS&duration](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/sysbench_tikv_details_grpc_qps2.png)
+![tikv cluster details leader](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/sysbench_tikv_details_leader.png)
 
 ## 结果分析
 从监控结果可以看到，tikv集群不同节点存在负载不均的情况。172.30.0.13节点cpu负载达到100%，是其余两个tikv节点的两倍。可以看到leader region在不同主机上的分布也不均匀，但节点的负载并不与leader的分布数量呈正比。
 对于该测试场景，可能存在热点region，导致部分tikv节点负载较高，可采取如下措施：
 1. 开启follower-read，通过从节点分摊读取负载。需要注意，tidb的follower-read是由一个session级别的系统变量控制
 2. 调整region的大小，让数据进一步分散。同时，需要注意的是由于本测试用例只有8个table，每个table包括200000条记录。本身的region数量也较少，因此容易出现热点region。
-
-
-# sysbench 测试
-
-
-
