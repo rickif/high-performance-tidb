@@ -89,3 +89,9 @@ p95: 0.52ms
 ```
 ./bin/go-tpc tpcc --warehouses 50 run -H 127.0.0.1 -P 4000
 ```
+
+## 监控
+![tidb query summary QPS&duration](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/tpcc-tidb-query-summary.png)
+![tikv cluster details cpu&QPS](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/tpcc-tikv-details-cpu-qps.png)
+![tikv cluster details region&leader](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/tpcc-tikv-details-region-leader.png)
+![tikv details grpc QPS&duration](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/tpcc-tikv-grpc-duration-qps.png)
