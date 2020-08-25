@@ -14,7 +14,10 @@
 输出：写出你对该配置与拓扑环境和 workload 下 TiDB 集群负载的分析，提出你认为的TiDB 的性能的瓶颈所在(能提出大致在哪个模块即可)
 
 # 环境准备
-采用4台腾讯云4C8G云主机作为部署介质，部署1个pd节点、1个tidb节点以及3个tikv节点。其中，pd节点和tidb节点混部在1台机器上，tikv节点独占3台机器，prometheus等监控组件跟tidb、pd部署同一台云主机
+![机器配置](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/machines.png)
+采用4台腾讯云4C8G云主机作为部署介质，部署1个pd节点、1个tidb节点以及3个tikv节点。其中，pd节点和tidb节点混部在1台机器上，tikv节点独占3台机器，prometheus等监控组件跟tidb、pd部署同一台云主机    
+
+注：本作业过程中购买了多次云主机，所以不同的测试用例使用的云主机可能不同
 
 # sysbench 测试
 ![集群配置](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/conf.png)
@@ -72,3 +75,17 @@ p95: 0.52ms
 
 ## 结果分析
 从输出结果来看，依然可以看到有较大的负载不均衡问题出现。由于负载测试时间较短，pd的调度还没有生效。因此，解决此类问题，还可调整pd的调度策略，使其对于突发负载更为敏感，实现较快的负载调度
+
+# TPC-C 测试
+
+![集群拓扑结构](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/tpcc-topology.png)
+
+## 测试用例
+1. 准备数据
+```
+./bin/go-tpc tpcc --warehouses 50 prepare -H 127.0.0.1 -P 4000
+```
+2. 执行测试
+```
+./bin/go-tpc tpcc --warehouses 50 run -H 127.0.0.1 -P 4000
+```
