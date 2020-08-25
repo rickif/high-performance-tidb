@@ -14,13 +14,16 @@
 输出：写出你对该配置与拓扑环境和 workload 下 TiDB 集群负载的分析，提出你认为的TiDB 的性能的瓶颈所在(能提出大致在哪个模块即可)
 
 # 环境准备
+## 机器配置
 ![机器配置](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/machines.png)
 采用4台腾讯云4C8G云主机作为部署介质，部署1个pd节点、1个tidb节点以及3个tikv节点。其中，pd节点和tidb节点混部在1台机器上，tikv节点独占3台机器，prometheus等监控组件跟tidb、pd部署同一台云主机    
 
 注：本作业过程中购买了多次云主机，所以不同的测试用例使用的云主机可能不同
 
 # sysbench 测试
+## 集群配置
 ![集群配置](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/conf.png)
+## 集群拓扑结构
 ![集群拓扑结构](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/topology.png)
 
 ## 测试用例
@@ -28,16 +31,22 @@
 sysbench --config-file=sysbench.conf oltp_update_index --tables=8 --table-size=200000 run
 ```
 ## sysbench 执行结果
+### sysbench 执行结果
 ![sysbench执行结果](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/sysbench_output.png)  
 
 查询性能: 20856 QPS/TPS
 p95: 0.52ms
 ## 监控
+### tidb query summary QPS&duration
 ![tidb query summary QPS&duration](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/sysbench_tidb_query_summary.png)
+### tikv cluster details cpu
 ![tikv cluster details cpu](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/sysbench_tikv_details_cpu.png)
+### tikv cluster details QPS
 ![tikv cluster details QPS](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/sysbench_tikv_details_qps.png)
+### tikv details grpc QPS&duration
 ![tikv details grpc QPS&duration](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/sysbench_tikv_details_grpc_qps.png)
 ![tikv details grpc QPS&duration](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/sysbench_tikv_details_grpc_qps2.png)
+### tikv cluster details leader
 ![tikv cluster details leader](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/sysbench_tikv_details_leader.png)
 
 ## 结果分析
@@ -47,7 +56,7 @@ p95: 0.52ms
 2. 调整region的大小，让数据进一步分散。同时，需要注意的是由于本测试用例只有8个table，每个table包括200000条记录。本身的region数量也较少，因此容易出现热点region
 
 # go-ycsb 测试
-
+## 集群拓扑结构
 ![集群拓扑结构](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/ycsb-topology.png)
 ## 测试用例
 
@@ -65,19 +74,24 @@ p95: 0.52ms
 可以看到，workloadb是读多写少的场景，读写比例为95:5
 
 ## 监控
-
+### tidb query summary duration
 ![tidb query summary duration](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/ycsb-tidb-query-summary.png)
+### tidb query summary QPS
 ![tidb query summary QPS](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/ycsb-tidb-query-summary-qps.png)
+### tikv cluster details cpu
 ![tikv cluster details cpu](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/ycsb-tikv-details-cpu.png)
+### tikv cluster details QPS
 ![tikv cluster details QPS](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/ycsb-tikv-details-qps.png)
-![tikv cluster details region&leader](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/ycsb-tikv-details-region-leader.png)
+### tikv details grpc QPS&duration
 ![tikv details grpc QPS&duration](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/ycsb-tikv-grpc-duration-qps.png)
+### tikv cluster details region&leader
+![tikv cluster details region&leader](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/ycsb-tikv-details-region-leader.png)
 
 ## 结果分析
 从输出结果来看，依然可以看到有较大的负载不均衡问题出现。由于负载测试时间较短，pd的调度还没有生效。因此，解决此类问题，还可调整pd的调度策略，使其对于突发负载更为敏感，实现较快的负载调度
 
 # TPC-C 测试
-
+## 集群拓扑结构
 ![集群拓扑结构](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/tpcc-topology.png)
 
 ## 测试用例
@@ -91,7 +105,14 @@ p95: 0.52ms
 ```
 
 ## 监控
+### tidb query summary QPS&duration
 ![tidb query summary QPS&duration](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/tpcc-tidb-query-summary.png)
+### tikv cluster details cpu&QPS
 ![tikv cluster details cpu&QPS](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/tpcc-tikv-details-cpu-qps.png)
-![tikv cluster details region&leader](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/tpcc-tikv-details-region-leader.png)
+### tikv details grpc QPS&duration
 ![tikv details grpc QPS&duration](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/tpcc-tikv-grpc-duration-qps.png)
+### tikv cluster details region&leader
+![tikv cluster details region&leader](https://github.com/rickif/high-performance-tidb/blob/master/asset/lesson2/tpcc-tikv-details-region-leader.png)
+
+## 结果分析
+在tpc-c测试用例中，有意加大了测试数据集的大小，可以看到leader角色的region分布较为均匀。但依然存在节点负载不均匀的情况。一方面，随着tidb接收了持续的请求，pd会根据负载的情况，动态调整leader的分布情况；另一方面，可以人为干预pd的参数，加速region调整的过程。
